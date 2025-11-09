@@ -1,0 +1,32 @@
+# FastAPI and server
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+python-multipart>=0.0.6
+
+# AI/ML
+anthropic>=0.72.0
+google-generativeai>=0.3.0  # Backup option
+
+# Document processing
+pymupdf>=1.24.0
+pdf2image>=1.17.0
+Pillow>=10.2.0
+python-docx>=1.1.0  # Word documents (.docx)
+python-pptx>=0.6.23  # PowerPoint files
+openpyxl>=3.1.2  # Excel files (.xlsx)
+pypandoc>=1.13  # Various document formats
+python-magic>=0.4.27  # File type detection
+
+# Image processing and analysis
+opencv-python>=4.9.0
+numpy>=1.26.0
+
+# Utilities
+python-dotenv>=1.0.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.23.0
+httpx>=0.26.0

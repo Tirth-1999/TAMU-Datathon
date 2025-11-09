@@ -1,0 +1,559 @@
+/* Import Design Tokens */
+@import './styles/design-tokens.css';
+
+/* Import Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* Tailwind Directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
+:root {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: var(--leading-normal);
+  font-weight: var(--font-normal);
+
+  color-scheme: light;
+  color: var(--gray-900);
+  background: var(--gray-50);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Hitachi legacy colors for backward compatibility */
+  --hitachi-red: var(--brand-red);
+  --hitachi-navy: var(--brand-navy);
+  --hitachi-blue: var(--accent-blue);
+  --hitachi-green: var(--success);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--gray-50);
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: var(--font-semibold);
+    color: var(--gray-900);
+    line-height: var(--leading-tight);
+  }
+
+  h1 {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+  }
+
+  h2 {
+    font-size: var(--text-3xl);
+  }
+
+  h3 {
+    font-size: var(--text-2xl);
+  }
+
+  h4 {
+    font-size: var(--text-xl);
+  }
+
+  p {
+    color: var(--gray-700);
+    line-height: var(--leading-relaxed);
+  }
+}
+
+/* ============================================
+   COMPONENT STYLES
+   Modern, clean components using design tokens
+   ============================================ */
+@layer components {
+  /* ========== BUTTONS ========== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    min-height: var(--button-height);
+    padding: 0 var(--button-padding-x);
+    font-weight: var(--font-medium);
+    font-size: var(--text-sm);
+    border-radius: var(--button-radius);
+    border: var(--border-width) solid transparent;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    white-space: nowrap;
+  }
+
+  .btn:focus-visible {
+    outline: 2px solid var(--accent-blue);
+    outline-offset: 2px;
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* Button Variants */
+  .btn-primary {
+    background: var(--gray-900);
+    color: white;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: var(--gray-800);
+    box-shadow: var(--shadow-base);
+  }
+
+  .btn-primary:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  .btn-secondary {
+    background: white;
+    color: var(--gray-900);
+    border-color: var(--gray-300);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--gray-50);
+    border-color: var(--gray-400);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--gray-700);
+  }
+
+  .btn-ghost:hover:not(:disabled) {
+    background: var(--gray-100);
+    color: var(--gray-900);
+  }
+
+  .btn-danger {
+    background: var(--error);
+    color: white;
+  }
+
+  .btn-danger:hover:not(:disabled) {
+    background: var(--brand-red-dark);
+  }
+
+  /* Button Sizes */
+  .btn-sm {
+    min-height: var(--button-height-sm);
+    padding: 0 var(--button-padding-x-sm);
+    font-size: var(--text-xs);
+  }
+
+  .btn-lg {
+    min-height: var(--button-height-lg);
+    padding: 0 var(--button-padding-x-lg);
+    font-size: var(--text-base);
+  }
+
+  /* Legacy button classes (for backward compatibility) */
+  .btn-hitachi-primary {
+    @apply btn btn-primary;
+  }
+
+  .btn-hitachi-secondary {
+    @apply btn btn-secondary;
+  }
+
+  /* ========== CARDS ========== */
+  .card {
+    background: var(--card-bg);
+    border: var(--border-width) solid var(--card-border);
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    transition: box-shadow var(--transition-base);
+  }
+
+  .card:hover {
+    box-shadow: var(--card-shadow-hover);
+  }
+
+  .card-interactive {
+    cursor: pointer;
+    transition: all var(--transition-base);
+  }
+
+  .card-interactive:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .card-interactive:active {
+    transform: translateY(0);
+  }
+
+  /* Legacy card class */
+  .card-hitachi {
+    @apply card;
+  }
+
+  /* ========== BADGES ========== */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    height: var(--badge-height);
+    padding: 0 var(--badge-padding-x);
+    font-size: var(--badge-font-size);
+    font-weight: var(--font-medium);
+    border-radius: var(--badge-radius);
+    white-space: nowrap;
+  }
+
+  /* Badge Variants */
+  .badge-neutral {
+    background: var(--gray-100);
+    color: var(--gray-700);
+    border: var(--border-width) solid var(--gray-200);
+  }
+
+  .badge-success {
+    background: var(--success-bg);
+    color: var(--success);
+    border: var(--border-width) solid var(--success-border);
+  }
+
+  .badge-warning {
+    background: var(--warning-bg);
+    color: var(--warning);
+    border: var(--border-width) solid var(--warning-border);
+  }
+
+  .badge-error {
+    background: var(--error-bg);
+    color: var(--error);
+    border: var(--border-width) solid var(--error-border);
+  }
+
+  .badge-info {
+    background: var(--info-bg);
+    color: var(--info);
+    border: var(--border-width) solid var(--info-border);
+  }
+
+  /* Legacy badge classes */
+  .badge-hitachi-red {
+    @apply badge badge-error;
+  }
+
+  .badge-hitachi-navy {
+    @apply badge badge-info;
+  }
+
+  /* ========== STATUS INDICATORS ========== */
+  .status-public {
+    @apply badge badge-success;
+  }
+
+  .status-confidential {
+    @apply badge badge-warning;
+  }
+
+  .status-highly-sensitive,
+  .status-sensitive {
+    @apply badge badge-error;
+  }
+
+  .status-unsafe {
+    background: #FAF5FF;
+    color: #A855F7;
+    border: var(--border-width) solid #E9D5FF;
+  }
+
+  /* ========== INPUTS ========== */
+  .input {
+    width: 100%;
+    height: var(--input-height);
+    padding: 0 var(--input-padding-x);
+    font-size: var(--text-sm);
+    color: var(--gray-900);
+    background: white;
+    border: var(--border-width) solid var(--input-border);
+    border-radius: var(--input-radius);
+    transition: all var(--transition-base);
+    outline: none;
+  }
+
+  .input:hover {
+    border-color: var(--gray-400);
+  }
+
+  .input:focus {
+    border-color: var(--input-border-focus);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .input::placeholder {
+    color: var(--gray-400);
+  }
+
+  /* Legacy input class */
+  .input-hitachi {
+    @apply input;
+  }
+
+  /* ========== UTILITY CLASSES ========== */
+  .text-muted {
+    color: var(--gray-500);
+  }
+
+  .text-subtle {
+    color: var(--gray-600);
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border-color);
+    border: none;
+  }
+
+  .divider-vertical {
+    width: 1px;
+    height: 100%;
+    background: var(--border-color);
+  }
+}
+
+/* ============================================
+   CUSTOM SCROLLBAR (Modern, Subtle)
+   ============================================ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--gray-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-400);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--gray-300) var(--gray-100);
+}
+
+/* ============================================
+   ANIMATIONS & KEYFRAMES
+   ============================================ */
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn var(--transition-base);
+}
+
+/* Slide up animation */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp var(--transition-base);
+}
+
+/* Slide in from right (for panels) */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight var(--transition-slow);
+}
+
+/* Slide out to right (for panels) */
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.animate-slide-out-right {
+  animation: slideOutRight var(--transition-slow);
+}
+
+/* Shimmer (for loading skeletons) */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--gray-200) 0%,
+    var(--gray-100) 20%,
+    var(--gray-200) 40%,
+    var(--gray-200) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s linear infinite;
+  border-radius: var(--radius-base);
+}
+
+/* Spin (for loading spinners) */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Pulse (use sparingly) */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ============================================
+   ACCESSIBILITY & FOCUS STYLES
+   ============================================ */
+
+/* Visible focus indicators for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
+/* Remove default focus styles */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Skip to main content link */
+.skip-to-main {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--gray-900);
+  color: white;
+  padding: var(--spacing-2) var(--spacing-4);
+  text-decoration: none;
+  z-index: var(--z-tooltip);
+}
+
+.skip-to-main:focus {
+  top: 0;
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+@layer utilities {
+  /* Hide scrollbar but allow scrolling */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari, Opera */
+  }
+
+  /* Fade in effect */
+  .animate-fade-in {
+    animation: fadeIn var(--transition-base);
+  }
+
+  /* Truncate text with ellipsis */
+  .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Line clamp utilities */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/* ============================================
+   RESPONSIVE BREAKPOINTS UTILITIES
+   ============================================ */
+@media (max-width: 640px) {
+  :root {
+    font-size: 14px; /* Slightly smaller base font on mobile */
+  }
+}
