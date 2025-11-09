@@ -192,7 +192,7 @@ export const ClassificationCard: React.FC<ClassificationCardProps> = ({
         </div>
 
         {/* Safety Details - Only show if there are specific flags or important details */}
-        {(!result.safety_check.is_safe && result.safety_check.flags.length > 0) && (
+        {(result.safety_check && !result.safety_check.is_safe && result.safety_check.flags.length > 0) && (
           <div className="p-3 sm:p-4 rounded-lg border-2 bg-red-50 border-red-200">
             <div className="flex items-center gap-2 mb-3">
               <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 flex-shrink-0" />
@@ -253,12 +253,14 @@ export const ClassificationCard: React.FC<ClassificationCardProps> = ({
         )}
 
         {/* Evidence Count */}
-        <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gray-50 rounded-lg border border-gray-200">
-          <Shield className="h-4 w-4 text-gray-700 flex-shrink-0" />
-          <span className="text-xs sm:text-sm text-gray-700">
-            <span className="font-semibold text-gray-900">{result.evidence.length}</span> pieces of evidence collected
-          </span>
-        </div>
+        {result.evidence && result.evidence.length > 0 && (
+          <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gray-50 rounded-lg border border-gray-200">
+            <Shield className="h-4 w-4 text-gray-700 flex-shrink-0" />
+            <span className="text-xs sm:text-sm text-gray-700">
+              <span className="font-semibold text-gray-900">{result.evidence.length}</span> pieces of evidence collected
+            </span>
+          </div>
+        )}
 
         {/* Progress Steps (Expandable) - Remove emoji logic */}
         {result.progress_steps && result.progress_steps.length > 0 && (

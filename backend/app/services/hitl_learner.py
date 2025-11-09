@@ -342,9 +342,83 @@ class HITLLearner:
         
         # Ensure confidence stays in valid range
         confidence = max(0.1, min(1.0, confidence))
-        
+
         return confidence, requires_review, review_reason
-    
+
+    def apply_learned_classification(
+        self,
+        classification: str,
+        confidence: float,
+        filename: str,
+        content_preview: str,
+        keywords: List[str]
+    ) -> Tuple[str, float, bool, Optional[str]]:
+        """
+        Check if a learned classification pattern should override the AI's classification.
+        This applies strong learning rules (e.g., "PII documents must be Highly Sensitive").
+
+        Returns:
+            (final_classification, final_confidence, was_overridden, override_reason)
+        """
+        if self.patterns is None:
+            self.patterns = self.analyze_corrections()
+
+        feedback_list = self.load_all_feedback()
+        if not feedback_list:
+            return classification, confidence, False, None
+
+        # Check for strong classification rules from human feedback
+        for feedback in feedback_list:
+            if not feedback.get("approved"):  # Only look at corrections
+                original_class = feedback.get("original_classification")
+                corrected_class = feedback.get("corrected_classification")
+
+                # Check if current AI classification matches a previously corrected one
+                if classification == original_class:
+                    # Get key indicators from the learned feedback
+                    learned_indicators = feedback.get("key_indicators", [])
+                    feedback_notes = feedback.get("feedback_notes", "").lower()
+
+                    # Count how many learned indicators match current document
+                    content_lower = content_preview.lower()
+                    filename_lower = filename.lower()
+                    combined_keywords = set([k.lower() for k in keywords]) if keywords else set()
+
+                    indicator_matches = 0
+                    for indicator in learned_indicators:
+                        indicator_lower = indicator.lower()
+                        if (indicator_lower in content_lower or
+                            indicator_lower in filename_lower or
+                            indicator_lower in combined_keywords):
+                            indicator_matches += 1
+
+                    # Strong match threshold: 3+ matching indicators or 50%+ of indicators match
+                    match_threshold = max(3, len(learned_indicators) * 0.5)
+
+                    # **DEBUG: Log matching details**
+                    print(f"[HITL DEBUG] Checking learned pattern: {original_class} → {corrected_class}")
+                    print(f"[HITL DEBUG] Indicators to match: {len(learned_indicators)}")
+                    print(f"[HITL DEBUG] Indicators found: {indicator_matches}")
+                    print(f"[HITL DEBUG] Match threshold: {match_threshold}")
+                    print(f"[HITL DEBUG] Keywords available: {len(keywords) if keywords else 0}")
+
+                    if indicator_matches >= match_threshold:
+                        # Apply the learned classification
+                        override_reason = (
+                            f"Learned rule applied: '{original_class}' → '{corrected_class}'. "
+                            f"Matched {indicator_matches}/{len(learned_indicators)} indicators. "
+                            f"Human feedback: {feedback.get('feedback_notes', 'Rule from previous correction')[:100]}"
+                        )
+
+                        print(f"[HITL OVERRIDE] {override_reason}")
+
+                        # Increase confidence since this is a learned pattern
+                        new_confidence = min(0.98, confidence + 0.10)
+
+                        return corrected_class, new_confidence, True, override_reason
+
+        return classification, confidence, False, None
+
     def get_few_shot_examples(self, classification: str, limit: int = 3) -> List[Dict[str, str]]:
         """
         Get few-shot learning examples for a specific classification.

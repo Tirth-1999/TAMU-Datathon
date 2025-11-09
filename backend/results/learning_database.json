@@ -1,6 +1,129 @@
 {
   "version": "1.0",
   "created_at": "2025-11-09T07:28:49.633904",
-  "total_feedback_count": 0,
-  "learning_entries": []
+  "total_feedback_count": 2,
+  "learning_entries": [
+    {
+      "document_id": "834e773d-c927-4823-ba1e-1cfd0f079907",
+      "reviewer_id": "user",
+      "approved": false,
+      "corrected_classification": "Highly Sensitive",
+      "original_classification": "Confidential",
+      "feedback_notes": "The document includes sensitive personally identifiable information (PII) and if any document has any PII it has to be by default a highly sensitive classified document.",
+      "timestamp": "2025-11-09T09:37:25.559703",
+      "document_context": {
+        "filename": "TC2_Filled_In_Employement_Application.pdf",
+        "page_count": 4,
+        "image_count": 7,
+        "summary": "A completed employment application for Susan Simmons, containing comprehensive personal and professional details including work history, education, and contact information. The document includes sensitive personally identifiable information (PII).",
+        "original_classification": "Confidential",
+        "confidence": 0.95,
+        "key_evidence": [
+          {
+            "quote": "Name (Last, First, Middle): Simmons, Susan J.",
+            "reasoning": "Direct personal identification information"
+          },
+          {
+            "quote": "E-mail address: Susan123@aol.com, Telephone number: (999) 555-0010",
+            "reasoning": "Contains personal contact information"
+          }
+        ],
+        "text_segments_summary": {
+          "total": 8,
+          "classifications": {
+            "Public": 1,
+            "Confidential": 6,
+            "Highly Sensitive": 1
+          }
+        },
+        "keywords": [
+          "personal name",
+          "personal phone",
+          "personal email",
+          "personal statement",
+          "personal address",
+          "employment history",
+          "criminal history",
+          "salary",
+          "equal opportunity",
+          "employment"
+        ]
+      },
+      "reasoning_for_correction": null,
+      "key_indicators": [
+        "personal name",
+        "personal phone",
+        "personal email",
+        "personal statement",
+        "personal address",
+        "employment history",
+        "criminal history",
+        "salary",
+        "equal opportunity",
+        "employment"
+      ],
+      "similar_document_patterns": [],
+      "learning_instruction": "LEARNING INSTRUCTION:\nWhen you see documents similar to 'TC2_Filled_In_Employement_Application.pdf':\n\nORIGINAL MISTAKE: Classified as 'Confidential' but should be 'ClassificationCategory.HIGHLY_SENSITIVE'\n\nKEY LESSON: The document includes sensitive personally identifiable information (PII) and if any document has any PII it has to be by default a highly sensitive classified document.\n\nWHAT TO LOOK FOR:\n\n- Company/organization names in document headers \u2192 Likely Confidential internal docs\n- Multiple segments classified as Confidential (6 found) \u2192 Overall doc is Confidential\n\nCORRECT CLASSIFICATION RULE:\nDocuments like this with 6 confidential segments containing \ninternal company information, procedures, or registration numbers should be classified as 'ClassificationCategory.HIGHLY_SENSITIVE', \nnot 'Confidential'.\n\nAPPLY THIS: When you see similar patterns (company docs, N-numbers, internal procedures), \nclassify as 'ClassificationCategory.HIGHLY_SENSITIVE' with high confidence."
+    },
+    {
+      "document_id": "249e7f0d-7dbc-48f8-a10a-089511b83544",
+      "reviewer_id": "user",
+      "approved": true,
+      "corrected_classification": null,
+      "original_classification": "Unsafe",
+      "feedback_notes": "Quick approval - classification correct",
+      "timestamp": "2025-11-09T10:27:05.364809",
+      "document_context": {
+        "filename": "badfile.pdf",
+        "page_count": 3,
+        "image_count": 3,
+        "summary": "A document containing simulated unsafe content designed to test content moderation systems. The text includes placeholders for various types of harmful language, threats, and offensive material.",
+        "original_classification": "Unsafe",
+        "confidence": 0.99,
+        "key_evidence": [
+          {
+            "quote": "Simulates hate speech against a group by inserting tags like [hate_group_1] and [derogatory_term].",
+            "reasoning": "Direct evidence of hate speech simulation"
+          },
+          {
+            "quote": "Includes targeted doxxing patterns: \"Here's their address: [personal_info_placeholder]\".",
+            "reasoning": "Demonstrates potential privacy violation and harassment techniques"
+          }
+        ],
+        "text_segments_summary": {
+          "total": 10,
+          "classifications": {
+            "Unsafe": 10
+          }
+        },
+        "keywords": [
+          "hate speech",
+          "violent",
+          "hate",
+          "fraud",
+          "bodily harm",
+          "exploitation",
+          "group targeting",
+          "scam",
+          "insult",
+          "grooming",
+          "threats",
+          "self-harm",
+          "violent language",
+          "explicit",
+          "threat",
+          "insults",
+          "harassment",
+          "mocking",
+          "propaganda",
+          "profanity"
+        ]
+      },
+      "reasoning_for_correction": null,
+      "key_indicators": [],
+      "similar_document_patterns": [],
+      "learning_instruction": null
+    }
+  ],
+  "last_updated": "2025-11-09T10:27:05.372415"
 }

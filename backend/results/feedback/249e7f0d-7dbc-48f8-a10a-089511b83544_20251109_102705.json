@@ -1,0 +1,59 @@
+{
+  "document_id": "249e7f0d-7dbc-48f8-a10a-089511b83544",
+  "reviewer_id": "user",
+  "approved": true,
+  "corrected_classification": null,
+  "original_classification": "Unsafe",
+  "feedback_notes": "Quick approval - classification correct",
+  "timestamp": "2025-11-09T10:27:05.364809",
+  "document_context": {
+    "filename": "badfile.pdf",
+    "page_count": 3,
+    "image_count": 3,
+    "summary": "A document containing simulated unsafe content designed to test content moderation systems. The text includes placeholders for various types of harmful language, threats, and offensive material.",
+    "original_classification": "Unsafe",
+    "confidence": 0.99,
+    "key_evidence": [
+      {
+        "quote": "Simulates hate speech against a group by inserting tags like [hate_group_1] and [derogatory_term].",
+        "reasoning": "Direct evidence of hate speech simulation"
+      },
+      {
+        "quote": "Includes targeted doxxing patterns: \"Here's their address: [personal_info_placeholder]\".",
+        "reasoning": "Demonstrates potential privacy violation and harassment techniques"
+      }
+    ],
+    "text_segments_summary": {
+      "total": 10,
+      "classifications": {
+        "Unsafe": 10
+      }
+    },
+    "keywords": [
+      "hate speech",
+      "violent",
+      "hate",
+      "fraud",
+      "bodily harm",
+      "exploitation",
+      "group targeting",
+      "scam",
+      "insult",
+      "grooming",
+      "threats",
+      "self-harm",
+      "violent language",
+      "explicit",
+      "threat",
+      "insults",
+      "harassment",
+      "mocking",
+      "propaganda",
+      "profanity"
+    ]
+  },
+  "reasoning_for_correction": null,
+  "key_indicators": [],
+  "similar_document_patterns": [],
+  "learning_instruction": null
+}

@@ -51,6 +51,8 @@ function App() {
   useEffect(() => {
     if (classificationResults.length > 0) {
       setCurrentResultIndex(classificationResults.length - 1); // Show most recent (last item)
+    } else {
+      setCurrentResultIndex(0); // Reset when no results
     }
   }, [classificationResults.length]);
 
@@ -58,7 +60,15 @@ function App() {
     try {
       const data = await classifyApi.getAllResults();
       if (data.results) {
-        setClassificationResults(data.results);
+        // Filter out invalid results (like learning_database.json metadata)
+        // Only keep results that have required classification properties
+        const validResults = data.results.filter((result: any) =>
+          result.document_id &&
+          result.classification &&
+          result.filename &&
+          result.summary
+        );
+        setClassificationResults(validResults);
       }
     } catch (error) {
       console.error('Failed to load results:', error);
@@ -246,8 +256,17 @@ function App() {
       // Delete from backend
       await classifyApi.deleteResult(documentId);
       
-      // Remove from results list
-      setClassificationResults(prev => prev.filter(r => r.document_id !== documentId));
+      // Remove from results list and adjust index if needed
+      setClassificationResults(prev => {
+        const filtered = prev.filter(r => r.document_id !== documentId);
+        // Adjust current index if it's now out of bounds
+        if (currentResultIndex >= filtered.length && filtered.length > 0) {
+          setCurrentResultIndex(filtered.length - 1);
+        } else if (filtered.length === 0) {
+          setCurrentResultIndex(0);
+        }
+        return filtered;
+      });
       
       // Remove from uploaded docs (in case it's still there)
       setUploadedDocs(prev => prev.filter(d => d.document_id !== documentId));
@@ -278,8 +297,11 @@ function App() {
       setClassificationResults([]);
       setUploadedDocs([]);
       setSelectedResult(null);
-
-      alert('All documents and results have been cleared successfully.');
+      setReviewingResult(null);
+      setClassifyingDocs(new Set());
+      setCurrentResultIndex(0); // Reset index
+      
+      alert('✅ All documents and results have been successfully deleted.');
     } catch (error: any) {
       alert(`Failed to clear all documents: ${error.message}`);
     }
@@ -700,14 +722,16 @@ function App() {
                 )}
 
                 {/* Current Result Card */}
-                <div className="animate-fade-in">
-                  <ClassificationCard
-                    result={classificationResults[currentResultIndex]}
-                    onViewDetails={() => handleViewDetails(classificationResults[currentResultIndex])}
-                    onReview={() => handleReview(classificationResults[currentResultIndex])}
-                    onDelete={() => handleDeleteResult(classificationResults[currentResultIndex].document_id)}
-                  />
-                </div>
+                {classificationResults[currentResultIndex] && (
+                  <div className="animate-fade-in">
+                    <ClassificationCard
+                      result={classificationResults[currentResultIndex]}
+                      onViewDetails={() => handleViewDetails(classificationResults[currentResultIndex])}
+                      onReview={() => handleReview(classificationResults[currentResultIndex])}
+                      onDelete={() => handleDeleteResult(classificationResults[currentResultIndex].document_id)}
+                    />
+                  </div>
+                )}
                 
                 {/* Show all button for quick access */}
                 {classificationResults.length > 1 && (
@@ -861,7 +885,7 @@ function App() {
                   `}
                 >
                   <span>Evidence</span>
-                  <Badge variant="info" className="text-xs">{selectedResult.evidence.length}</Badge>
+                  <Badge variant="info" className="text-xs">{selectedResult.evidence?.length || 0}</Badge>
                 </button>
               </nav>
             </div>
@@ -925,52 +949,54 @@ function App() {
                   )}
 
                   {/* Safety Assessment Card */}
-                  <div className="card p-4 sm:p-6 border-l-4 border-green-500">
-                    <div className="flex items-center space-x-2 mb-4">
-                      <Shield className="h-5 w-5 text-green-600" />
-                      <h3 className="text-base sm:text-lg font-bold text-gray-900">Safety Assessment</h3>
-                    </div>
-                    <div className={`p-4 rounded-xl ${
-                      selectedResult.safety_check.is_safe
-                        ? 'bg-gradient-to-r from-green-600/10 to-transparent border-2 border-green-500/30'
-                        : 'bg-gradient-to-r from-red-500/10 to-transparent border-2 border-red-500/30'
-                    }`}>
-                      <div className="flex items-center space-x-3 mb-3">
-                        {selectedResult.safety_check.is_safe ? (
-                          <CheckCircle2 className="h-6 w-6 text-green-600" />
-                        ) : (
-                          <AlertTriangle className="h-6 w-6 text-red-600" />
-                        )}
-                        <span className={`text-lg font-bold ${
-                          selectedResult.safety_check.is_safe ? 'text-green-600' : 'text-red-700'
-                        }`}>
-                          {selectedResult.safety_check.is_safe ? 'Content Safe' : 'Content Flagged'}
-                        </span>
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          selectedResult.safety_check.is_safe
-                            ? 'bg-green-600/20 text-green-600'
-                            : 'bg-red-500/20 text-red-700'
-                        }`}>
-                          {Math.round(selectedResult.safety_check.confidence * 100)}% confidence
-                        </span>
+                  {selectedResult.safety_check && (
+                    <div className="card p-4 sm:p-6 border-l-4 border-green-500">
+                      <div className="flex items-center space-x-2 mb-4">
+                        <Shield className="h-5 w-5 text-green-600" />
+                        <h3 className="text-base sm:text-lg font-bold text-gray-900">Safety Assessment</h3>
                       </div>
-                      <p className={`text-sm sm:text-base leading-relaxed ${selectedResult.safety_check.is_safe ? 'text-gray-700' : 'text-red-700'}`}>
-                        {selectedResult.safety_check.details}
-                      </p>
-                      {selectedResult.safety_check.flags.length > 0 && (
-                        <div className="mt-4 pt-4 border-t border-gray-200">
-                          <p className="text-xs font-semibold text-gray-600 mb-2">Detected Flags:</p>
-                          <div className="flex flex-wrap gap-2">
-                            {selectedResult.safety_check.flags.map((flag, idx) => (
-                              <span key={idx} className="px-3 py-1 bg-white border border-red-300 text-red-700 rounded-lg text-xs font-semibold shadow-sm">
-                                {flag}
-                              </span>
-                            ))}
-                          </div>
+                      <div className={`p-4 rounded-xl ${
+                        selectedResult.safety_check.is_safe
+                          ? 'bg-gradient-to-r from-green-600/10 to-transparent border-2 border-green-500/30'
+                          : 'bg-gradient-to-r from-red-500/10 to-transparent border-2 border-red-500/30'
+                      }`}>
+                        <div className="flex items-center space-x-3 mb-3">
+                          {selectedResult.safety_check.is_safe ? (
+                            <CheckCircle2 className="h-6 w-6 text-green-600" />
+                          ) : (
+                            <AlertTriangle className="h-6 w-6 text-red-600" />
+                          )}
+                          <span className={`text-lg font-bold ${
+                            selectedResult.safety_check.is_safe ? 'text-green-600' : 'text-red-700'
+                          }`}>
+                            {selectedResult.safety_check.is_safe ? 'Content Safe' : 'Content Flagged'}
+                          </span>
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            selectedResult.safety_check.is_safe
+                              ? 'bg-green-600/20 text-green-600'
+                              : 'bg-red-500/20 text-red-700'
+                          }`}>
+                            {Math.round(selectedResult.safety_check.confidence * 100)}% confidence
+                          </span>
                         </div>
-                      )}
+                        <p className={`text-sm sm:text-base leading-relaxed ${selectedResult.safety_check.is_safe ? 'text-gray-700' : 'text-red-700'}`}>
+                          {selectedResult.safety_check.details}
+                        </p>
+                        {selectedResult.safety_check.flags.length > 0 && (
+                          <div className="mt-4 pt-4 border-t border-gray-200">
+                            <p className="text-xs font-semibold text-gray-600 mb-2">Detected Flags:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {selectedResult.safety_check.flags.map((flag, idx) => (
+                                <span key={idx} className="px-3 py-1 bg-white border border-red-300 text-red-700 rounded-lg text-xs font-semibold shadow-sm">
+                                  {flag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Document Context Analysis */}
                   {selectedResult.document_context && (
@@ -1145,7 +1171,7 @@ function App() {
                 />
               )}
 
-              {detailTab === 'evidence' && (
+              {detailTab === 'evidence' && selectedResult.evidence && (
                 <EvidenceViewer evidence={selectedResult.evidence} />
               )}
             </div>

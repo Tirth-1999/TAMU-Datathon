@@ -78,12 +78,12 @@ class DocumentClassifier:
             filename=metadata.filename,
             content_preview=content_preview
         )
-        
+
         # Log confidence adjustment
         if adjusted_confidence != primary_result["confidence"]:
             print(f"[HITL] Confidence adjusted: {primary_result['confidence']:.2f} → {adjusted_confidence:.2f}")
             print(f"[HITL] Reason: {hitl_reason}")
-        
+
         primary_result["confidence"] = adjusted_confidence
 
         # Optional dual verification
@@ -424,6 +424,12 @@ Do NOT classify as Public if segments contain confidential business information.
                     result["safety_assessment"]["flags"]
                 )
 
+            # **FIX: Validate safety assessment for contradictions**
+            if "safety_assessment" in result:
+                result["safety_assessment"] = self._validate_safety_assessment(
+                    result["safety_assessment"]
+                )
+
             return result
 
         except Exception as e:
@@ -521,6 +527,63 @@ Do NOT classify as Public if segments contain confidential business information.
             print(f"WARNING: Unknown safety flag '{flag}', defaulting to 'Safe'")
             return "Safe"
 
+    def _validate_safety_assessment(self, safety_assessment: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Validate and fix contradictory safety assessments.
+
+        CRITICAL RULES:
+        1. If is_safe=false, flags MUST NOT include "Safe"
+        2. If is_safe=true, flags MUST be ["Safe"]
+        3. If details mention PII/identity theft/data breach, force is_safe=true
+        """
+        is_safe = safety_assessment.get("is_safe", True)
+        flags = safety_assessment.get("flags", ["Safe"])
+        details = safety_assessment.get("details", "").lower()
+
+        # **FIX 1: Detect PII-related safety issues (WRONG!) and correct them**
+        pii_keywords = ["identity theft", "data breach", "personal information disclosure",
+                       "pii", "ssn", "credit card", "personally identifiable"]
+
+        if any(keyword in details for keyword in pii_keywords):
+            # This is a SENSITIVITY issue, not a safety issue
+            print(f"[SAFETY VALIDATOR] Correcting PII misclassification as safety issue")
+            print(f"[SAFETY VALIDATOR] Original: is_safe={is_safe}, flags={flags}, details={details[:100]}")
+
+            # Force safe
+            is_safe = True
+            flags = ["Safe"]
+            details = "No harmful content detected"
+
+            print(f"[SAFETY VALIDATOR] Corrected: is_safe=True, flags=['Safe'], details='No harmful content detected'")
+
+        # **FIX 2: Ensure consistency between is_safe and flags**
+        if is_safe:
+            # If safe, flags must be ["Safe"]
+            if flags != ["Safe"]:
+                print(f"[SAFETY VALIDATOR] Fixing is_safe=True but flags={flags} → forcing flags=['Safe']")
+                flags = ["Safe"]
+        else:
+            # If unsafe, flags must NOT include "Safe"
+            if "Safe" in flags:
+                if len(flags) == 1:
+                    # Only flag is "Safe" but is_safe=False - contradiction!
+                    # This means AI incorrectly marked as unsafe
+                    print(f"[SAFETY VALIDATOR] Contradiction: is_safe=False but only flag is 'Safe' → forcing is_safe=True")
+                    is_safe = True
+                    flags = ["Safe"]
+                else:
+                    # Multiple flags including "Safe" - remove "Safe"
+                    print(f"[SAFETY VALIDATOR] Removing 'Safe' from flags since is_safe=False")
+                    flags = [f for f in flags if f != "Safe"]
+
+        # Return corrected assessment
+        return {
+            "is_safe": is_safe,
+            "flags": flags,
+            "details": details if isinstance(details, str) else safety_assessment.get("details", ""),
+            "confidence": safety_assessment.get("confidence", 0.95)
+        }
+
     def _assess_hitl_need(
         self,
         primary_result: Dict[str, Any],
@@ -566,10 +629,10 @@ Do NOT classify as Public if segments contain confidential business information.
                 "reasoning": "Automated classification failed, defaulting to Confidential for safety"
             }],
             "safety_assessment": {
-                "is_safe": False,
+                "is_safe": True,
                 "flags": ["Safe"],
-                "details": "Could not complete safety assessment due to error",
-                "confidence": 0.0
+                "details": "Could not complete safety assessment due to error - defaulting to safe",
+                "confidence": 0.5
             }
         }
     
@@ -637,8 +700,8 @@ Do NOT classify as Public if segments contain confidential business information.
                 )],
                 safety_check=SafetyCheckResult(
                     is_safe=False,
-                    flags=self._normalize_safety_flags([quick_unsafe.get('quick_flag', 'Safe')]),
-                    details=f"Quick preliminary scan detected {quick_unsafe.get('quick_flag')}. {quick_unsafe.get('evidence', '')}",
+                    flags=self._normalize_safety_flags([quick_unsafe.get('quick_flag', 'Violence')]),
+                    details=f"Quick preliminary scan detected {quick_unsafe.get('quick_flag', 'unsafe content')}. {quick_unsafe.get('evidence', '')}",
                     confidence=0.95
                 ),
                 page_count=metadata.page_count,
@@ -779,6 +842,25 @@ Do NOT classify as Public if segments contain confidential business information.
         update_progress("🔎 Extracting keywords...")
         all_keywords = self._extract_all_keywords(text_segments, image_analyses, primary_result)
         update_progress(f"✅ Extracted {len(all_keywords)} keywords")
+
+        # **NEW: Step 6.5: Apply learned classification rules from human feedback**
+        learned_classification, learned_confidence, was_overridden, override_reason = self.hitl_learner.apply_learned_classification(
+            classification=final_classification,
+            confidence=final_confidence,
+            filename=metadata.filename,
+            content_preview=full_text[:2000] if full_text else "",
+            keywords=all_keywords
+        )
+
+        if was_overridden:
+            update_progress(f"🎓 LEARNED RULE APPLIED: {final_classification} → {learned_classification}")
+            print(f"[HITL OVERRIDE] {override_reason}")
+            final_classification = learned_classification
+            final_confidence = learned_confidence
+            if verification_notes:
+                verification_notes += f"\n\n🎓 LEARNED RULE APPLIED: {override_reason}"
+            else:
+                verification_notes = f"🎓 LEARNED RULE APPLIED: {override_reason}"
 
         # Step 7: Determine HITL need
         update_progress("👤 Assessing human review requirements...")
