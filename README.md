@@ -350,7 +350,11 @@ Clear separation prevents false positives:
 Every classification includes:
 - Exact quotes with page numbers
 - Image analysis results
-- Keyword relevance scores
+- Keyword relevance scores# Navigate to frontend (in a new terminal)
+cd frontend
+
+# Install dependencies
+npm install
 - Reasoning for each label
 - Confidence breakdown
 
